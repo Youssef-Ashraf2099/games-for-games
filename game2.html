@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game with Numbers</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        .memory-game {
+            width: 640px;
+            height: 640px;
+            display: flex;
+            flex-wrap: wrap;
+            perspective: 1000px;
+        }
+        .memory-card {
+            width: calc(25% - 10px);
+            height: calc(25% - 10px);
+            margin: 5px;
+            position: relative;
+            transform: scale(1);
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+            cursor: pointer;
+        }
+        .memory-card:active {
+            transform: scale(0.97);
+            transition: transform 0.2s;
+        }
+        .memory-card.flip {
+            transform: rotateY(180deg);
+        }
+        .front-face,
+        .back-face {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .front-face {
+            background: #2e3d49;
+            color: white;
+            transform: rotateY(180deg);
+        }
+        .back-face {
+            background: #fff;
+            color: #2e3d49;
+        }
+        .score {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #2e3d49;
+        }
+    </style>
+</head>
+<body>
+    <div class="memory-game" id="memory-game">
+        <!-- Cards will be dynamically generated here -->
+    </div>
+    <div class="score">Score: <span id="score">0</span></div>
+
+    <script>
+        const memoryGame = document.getElementById('memory-game');
+        const scoreElement = document.getElementById('score');
+        let score = 0;
+        let hasFlippedCard = false;
+        let lockBoard = false;
+        let firstCard, secondCard;
+        let isBonusTurn = false;
+
+        // Numbers from 1 to 8 (7 is bonus, 8 is penalty)
+        const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
+
+        // Shuffle the numbers
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Create cards dynamically
+        function createCards() {
+            const shuffledNumbers = shuffle(numbers);
+            shuffledNumbers.forEach((number, index) => {
+                const card = document.createElement('div');
+                card.classList.add('memory-card');
+                card.dataset.number = number;
+
+                const frontFace = document.createElement('div');
+                frontFace.classList.add('front-face');
+                frontFace.textContent = number;
+
+                const backFace = document.createElement('div');
+                backFace.classList.add('back-face');
+                backFace.textContent = '?';
+
+                card.appendChild(frontFace);
+                card.appendChild(backFace);
+                memoryGame.appendChild(card);
+            });
+        }
+
+        // Flip card logic
+        function flipCard() {
+            if (lockBoard || this === firstCard) return;
+
+            this.classList.add('flip');
+
+            if (!hasFlippedCard) {
+                hasFlippedCard = true;
+                firstCard = this;
+                return;
+            }
+
+            secondCard = this;
+            checkForMatch();
+        }
+
+        // Check for match or bonus/penalty
+        function checkForMatch() {
+            const firstNumber = firstCard.dataset.number;
+            const secondNumber = secondCard.dataset.number;
+
+            if (firstNumber === secondNumber) {
+                if (firstNumber === '7') {
+                    handleBonus();
+                } else if (firstNumber === '8') {
+                    handlePenalty();
+                } else {
+                    disableCards();
+                    updateScore(1);
+                }
+            } else {
+                unflipCards();
+            }
+        }
+
+        // Handle bonus card logic
+        function handleBonus() {
+            const randomChoice = Math.random() < 0.5 ? 1 : 2;
+            if (randomChoice === 1) {
+                updateScore(1);
+                isBonusTurn = true;
+            } else {
+                updateScore(2);
+                lockBoard = true;
+                setTimeout(() => {
+                    resetBoard();
+                }, 1500);
+            }
+            disableCards();
+        }
+
+        // Handle penalty card logic
+        function handlePenalty() {
+            const randomChoice = Math.random() < 0.5 ? 1 : 2;
+            if (randomChoice === 1) {
+                updateScore(-1);
+                isBonusTurn = true;
+            } else {
+                updateScore(-2);
+                lockBoard = true;
+                setTimeout(() => {
+                    resetBoard();
+                }, 1500);
+            }
+            disableCards();
+        }
+
+        // Disable matched cards
+        function disableCards() {
+            firstCard.removeEventListener('click', flipCard);
+            secondCard.removeEventListener('click', flipCard);
+
+            if (!isBonusTurn) {
+                resetBoard();
+            } else {
+                isBonusTurn = false;
+                hasFlippedCard = false;
+                firstCard = null;
+                secondCard = null;
+            }
+        }
+
+        // Unflip mismatched cards
+        function unflipCards() {
+            lockBoard = true;
+
+            setTimeout(() => {
+                firstCard.classList.remove('flip');
+                secondCard.classList.remove('flip');
+
+                resetBoard();
+            }, 1500);
+        }
+
+        // Reset the board
+        function resetBoard() {
+            [hasFlippedCard, lockBoard] = [false, false];
+            [firstCard, secondCard] = [null, null];
+        }
+
+        // Update the score
+        function updateScore(points) {
+            score += points;
+            scoreElement.textContent = score;
+        }
+
+        // Initialize the game
+        createCards();
+        const cards = document.querySelectorAll('.memory-card');
+        cards.forEach(card => card.addEventListener('click', flipCard));
+    </script>
+</body>
+</html>
