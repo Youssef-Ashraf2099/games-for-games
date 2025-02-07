@@ -3,15 +3,20 @@
 <head>
     <title>Edit Distance</title>
     <link rel="stylesheet" type="text/css" href="EditDistanceStyle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="strings">
-        <p class="string" id="string1">Problem: <span id="problem"></span></p>
-        <p class="string" id="string2">Target: <span id="target"></span></p>
+        <div class="string-frame" id="problem-frame">
+            <p class="string" id="string1">Problem: <span id="problem"></span></p>
+        </div>
+        <div class="string-frame" id="target-frame">
+            <p class="string" id="string2">Target: <span id="target"></span></p>
+        </div>
     </div>
     <input type="number" id="guess" class="input" placeholder="Enter your guess">
-    <button class="button" onclick="checkGuess()">Submit Guess</button>
-    <button class="button" onclick="applyNextStep()">Apply Next Step</button>
+    <button class="button submit" onclick="checkGuess()"><i class="fas fa-check"></i> Submit Guess</button>
+    <button class="button next" onclick="applyNextStep()"><i class="fas fa-forward"></i> Apply Next Step</button>
     <p id="message" class="string"></p>
 
     <script src="EditDistanceScript.js"></script>

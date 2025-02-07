@@ -1,4 +1,3 @@
-/* filepath: /c:/Users/lloye/Downloads/games-for-games/game4/EditDistanceScript.js */
 function generateRandomString(length) {
     let result = '';
     let characters = 'abcdefghijklmnopqrstuvwxyz';
@@ -67,6 +66,10 @@ function editDistance(s, t) {
 
 function checkGuess() {
     let guess = parseInt(document.getElementById("guess").value);
+    if (isNaN(guess)) {
+        document.getElementById("message").innerText = "Please enter a valid number.";
+        return;
+    }
     if (guess === minOperations) {
         document.getElementById("message").innerText = "Correct! The minimum number of operations is " + minOperations;
     } else {
@@ -99,5 +102,11 @@ function applyNextStep() {
         currentStep++;
     }
 }
+
+document.getElementById("guess").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        checkGuess();
+    }
+});
 
 editDistance(s, t);
