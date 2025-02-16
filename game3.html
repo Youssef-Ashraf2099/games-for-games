@@ -57,6 +57,12 @@
             color: white;
             display: none;
             z-index: 4;
+            text-align: center;
+        }
+        #js-restart {
+            margin-top: 20px;
+            font-size: 24px;
+            z-index: 4;
         }
     </style>
 </head>
@@ -64,11 +70,15 @@
     <div id="game-container">
         <div id="bird"></div>
         <div id="score">Score: 0</div>
-        <div id="game-over">Game Over!</div>
+        <div id="game-over">
+            Game Over!
+            <button id="js-restart">Restart</button>
+        </div>
     </div>
 
     <script>
-        const gameContainer = document.getElementById('game-container');
+        function InitializeGame(){
+            const gameContainer = document.getElementById('game-container');
         const bird = document.getElementById('bird');
         const scoreElement = document.getElementById('score');
         const gameOverElement = document.getElementById('game-over');
@@ -186,6 +196,21 @@
 
         // Generate pipes every 1.5 seconds
         setInterval(createPipe, 1500);
+        document.getElementById("js-restart").addEventListener('click', () => {
+            const gameOverElement = document.getElementById("game-over");
+            gameOverElement.style.display = 'none';
+            document.getElementById('game-container').innerHTML = `
+            <div id="bird"></div>
+            <div id="score">Score: 0</div>
+            <div id="game-over">
+                Game Over!
+                <button id="js-restart">Restart</button>
+            </div>
+            `;
+            InitializeGame();
+        });
+        }
+        InitializeGame();
     </script>
 </body>
 </html>
